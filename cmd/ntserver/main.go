@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net"
 	"time"
+
+	"github.com/1681-dodo-bird/nettest/msg"
 )
 
 func server(ch chan int64, ch2 chan int) {
@@ -25,27 +27,28 @@ func server(ch chan int64, ch2 chan int) {
 	buf := make([]byte, 1024)
 
 	i := 0
-	var l, l2, delta int64
+	var l2, delta int64
+	m := msg.Message{}
 	for {
-		n, _, err := conn.ReadFromUDP(buf)
+		n, remote, err := conn.ReadFromUDP(buf)
 		if err != nil {
 			fmt.Printf("error at Read.%s\n", err)
 			continue
 		}
-		err = binary.Read(bytes.NewReader(buf[:n]), binary.BigEndian, &l)
+		err = binary.Read(bytes.NewReader(buf[:n]), binary.BigEndian, &m)
 		if err != nil {
 			fmt.Printf("error at Read.%s\n", err)
 			continue
 		}
-		delta = l - l2
+		delta = m.I - l2
 		if delta > 1 {
 			ch <- delta
-			fmt.Printf("loss: %d\n", delta)
 		}
-		l2 = l
+		l2 = m.I
+
+		conn.WriteTo(buf[:n], remote)
 		i++
 		if i%100000 == 0 {
-			// fmt.Println(time.Now())
 			i = 0
 			ch2 <- 0
 		}
