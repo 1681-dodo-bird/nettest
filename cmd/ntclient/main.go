@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/binary"
+	"flag"
 	"fmt"
 	"net"
 	"time"
@@ -67,8 +68,14 @@ func printer(ch chan time.Duration) {
 }
 
 func main() {
+
+	var addr string
+
+	flag.StringVar(&addr, "address", "127.0.0.1:12299", "IP:Port")
+	flag.Parse()
+
 	// UDP準備
-	serverAddr, err := net.ResolveUDPAddr("udp", "192.168.0.199:12299")
+	serverAddr, err := net.ResolveUDPAddr("udp", addr)
 	if err != nil {
 		fmt.Printf("Cannot listen:%s\n", err)
 		return
