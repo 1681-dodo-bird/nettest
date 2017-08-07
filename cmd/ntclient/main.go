@@ -80,7 +80,7 @@ func main() {
 		fmt.Printf("Cannot listen:%s\n", err)
 		return
 	}
-	clientAddr, err := net.ResolveUDPAddr("udp", ":33444")
+	clientAddr, err := net.ResolveUDPAddr("udp", ":")
 	if err != nil {
 		fmt.Printf("Cannot listen:%s\n", err)
 		return
@@ -100,12 +100,15 @@ func main() {
 	buf := &bytes.Buffer{}
 	m := msg.Message{}
 	var now time.Time
+	var i uint64 = 0
 	for {
 		// バッファ初期化
 		buf.Reset()
 
 		// バッファに書き込み
 		now = time.Now()
+		m.Index = i
+		i++
 		m.StartAtSec = now.Unix()
 		m.StartAtNSec = now.UnixNano() % (1000 * 1000 * 1000)
 		err = binary.Write(buf, binary.BigEndian, &m)

@@ -10,7 +10,7 @@ import (
 	"github.com/1681-dodo-bird/nettest/msg"
 )
 
-func server(ch chan int64, ch2 chan int) {
+func server(ch chan uint64, ch2 chan int) {
 	serverAddr, err := net.ResolveUDPAddr("udp", ":12299")
 	if err != nil {
 		fmt.Printf("Cannot listen:%s\n", err)
@@ -27,7 +27,7 @@ func server(ch chan int64, ch2 chan int) {
 	buf := make([]byte, 1024)
 
 	i := 0
-	var l2, delta int64
+	var l2, delta uint64
 	m := msg.Message{}
 	for {
 		n, remote, err := conn.ReadFromUDP(buf)
@@ -40,11 +40,11 @@ func server(ch chan int64, ch2 chan int) {
 			fmt.Printf("error at Read.%s\n", err)
 			continue
 		}
-		delta = m.I - l2
+		delta = m.Index - l2
 		if delta > 1 {
 			ch <- delta
 		}
-		l2 = m.I
+		l2 = m.Index
 
 		conn.WriteTo(buf[:n], remote)
 		i++
@@ -57,7 +57,7 @@ func server(ch chan int64, ch2 chan int) {
 }
 
 func main() {
-	ch := make(chan int64)
+	ch := make(chan uint64)
 	ch2 := make(chan int)
 	go server(ch, ch2)
 
